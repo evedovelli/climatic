@@ -6,20 +6,16 @@ from .Connection import Connection
 PTY_WINSIZE_ROWS = 24
 PTY_WINSIZE_COLS = 500
 
-SSH_PORT = 22
-
-class Ssh(Connection):
-    """ Connects to a CLI using SSH.
-    The device should have the IP configured.
+class Ser2Net(Connection):
+    """ Connects to a CLI using Ser2net.
+    The Ser2Net should be available and configured with an IP and port
     """
 
-    def __init__(self, ip: str, user: str, port=SSH_PORT):
-        """ Initialize the SSH connection object.
+    def __init__(self, ip: str, port: int):
+        """ Initialize the Ser2Net connection object.
         @param ip    IP address to connect to. Ex: '192.168.33.4'.
-        @param user  The SSH connection user.
-        @param port  The SSH connection port. Default is 22.
+        @param port  The port corresponding to the desired serial device.
         """
-        self.user = user
         self.ip = ip
         self.port = port
 
@@ -31,11 +27,11 @@ class Ssh(Connection):
         @param logger   Optional logger for debug messages
         """
         if logger != None:
-            logger.debug("Connecting to SSH (%s).", self.ip)
+            logger.debug("Connecting to Ser2Net (%s %s).", self.ip, selp.port)
+
         self.terminal = pexpect.spawn(
-                'ssh -p {2} {0}@{1}'.format(self.user, self.ip, self.port),
-                logfile=logfile,
-                encoding='utf-8')
+            'telnet {0} {1}'.format(self.ip, self.port), logfile=logfile, encoding='utf-8')
+        self.terminal.sendline()
         self.terminal.setwinsize(PTY_WINSIZE_ROWS, PTY_WINSIZE_COLS)
 
     def disconnect(self, logger=None):
@@ -43,4 +39,5 @@ class Ssh(Connection):
         @param logger   Optional logger for debug messages
         """
         if logger != None:
-            logger.debug("Disconnecting from SSH (%s).", self.ip)
+            logger.debug("Disconnecting from Ser2Net (%s %s).", self.ip, selp.port)
+        self.terminal.close()

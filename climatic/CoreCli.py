@@ -67,7 +67,7 @@ class CoreCli(object):
 
         # Connect to the CLI
         startup_log = StringIO()
-        self.connection.connect(startup_log)  # [Connection]
+        self.connection.connect(startup_log, logger=self.logger)  # [Connection]
         try:
             self.login()  # [CLI]
         except:
@@ -89,7 +89,7 @@ class CoreCli(object):
             return
 
         self.logout()
-        self.connection.disconnect()
+        self.connection.disconnect(logger=self.logger)
 
 
     def run(self, cmds: str, timeout=None, quiet=False, marker="#", error_marker="%", sync_timeout=1,
