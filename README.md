@@ -1,45 +1,37 @@
 # CLImatic
 
-.. image:: https://img.shields.io/badge/Licence-MIT-brightgreen.svg
-    :target: https://www.tldrlegal.com/l/mit
-    :alt: License
-
-.. image:: https://img.shields.io/pypi/pyversions/climatic.svg
-    :target: https://pypi.python.org/pypi/climatic
-    :alt: PyPI versions
+[![License](https://img.shields.io/badge/Licence-MIT-brightgreen.svg)](https://www.tldrlegal.com/l/mit) [![PyPI versions](https://img.shields.io/pypi/pyversions/climatic.svg)](https://pypi.python.org/pypi/climatic)
 
 **CLImatic** is tool to ease and automate CLI usage. It abstracts the CLI connection for you and
 you just need to send commands and process the returned results.
 
 
-Install
--------
+## Install
 
 Install the last stable release from PyPI using pip or easy_install:
 
-.. code-block:: bash
-
-    $ pip3 install climatic
+```bash
+> pip3 install climatic
+```
 
 Or install the latest sources from Github:
 
-.. code-block:: bash
+```bash
+> pip3 install -e git+git://github.com/evedovelli/climatic.git#egg=climatic
+```
 
-     $ pip3 install -e git+git://github.com/evedovelli/climatic.git#egg=climatic
 
-
-Usage
------
+## Usage
 
 Import the **CLImatic** CLI client, open the connection, and run commands. That's all!
 
-.. code-block:: python
+```python
+from climatic.cli.Linux import SshLinux
 
-    from climatic.cli.Linux import SshLinux
-
-    cmd = SshLinux("127.0.0.1", "your.user", "your.password")
-    cmd.run("mkdir /tmp/test")
-    cmd.run("ls /tmp/")
+cmd = SshLinux("127.0.0.1", "your.user", "your.password")
+cmd.run("mkdir /tmp/test")
+cmd.run("ls /tmp/")
+```
 
 And what if you need to check the outputs of the commands?
 
@@ -52,29 +44,28 @@ to make any validation you'd like. When used with the [`expects`](https://github
 library (or with the assertion library of your preference), it becomes a powerfull tool to write
 TDD/BDD tests for CLIs. Take a look at this example:
 
-.. code-block:: python
+```python
+from climatic.cli.Linux import SshLinux
+from expects import *
 
-    from climatic.cli.Linux import SshLinux
-    from expects import *
+cmd = SshLinux("127.0.0.1", "your.user", "your.password")
 
-    cmd = SshLinux("127.0.0.1", "your.user", "your.password")
+cmd.run("mkdir /tmp/test")
 
-    cmd.run("mkdir /tmp/test")
+# In an expressive manner, you can test if the cmd run output contains a specific term:
+expect(cmd.run("ls /tmp/").output).to(contain("test"))
 
-    # In an expressive manner, you can test if the cmd run output contains a specific term:
-    expect(cmd.run("ls /tmp/").output).to(contain("test"))
+cmd.run("rm -r /tmp/test")
 
-    cmd.run("rm -r /tmp/test")
+# Or if it does not contain it:
+expect(cmd.run("ls /tmp/").output).not_to(contain("test"))
 
-    # Or if it does not contain it:
-    expect(cmd.run("ls /tmp/").output).not_to(contain("test"))
+# You can also verify the duration of a command run:
+expect(cmd.run("sleep 2").duration).to(be_below(3))
+expect(cmd.run("sleep 3").duration).to(be_above(2))
+```
 
-    # You can also verify the duration of a command run:
-    expect(cmd.run("sleep 2").duration).to(be_below(3))
-    expect(cmd.run("sleep 3").duration).to(be_above(2))
-
-
->> Read the [`expects`](https://github.com/jaimegildesagredo/expects) docs for discovering other matchers or how to build your own.
+> Read the [`expects`](https://github.com/jaimegildesagredo/expects) docs for discovering other matchers or how to build your own.
 
 **CLImatic** includes only a few built-in CLI clients, as the Linux client from the example above,
 but you will find many other CLI clients extensions. There a list with supported CLI clients in
@@ -83,21 +74,20 @@ but you will find many other CLI clients extensions. There a list with supported
 In this example, we are accessing and running commands in a remote python3 CLI through a
 SSH connection with [CLImatic-Python](https://github.com/evedovelli/climatic-python) client:
 
-.. code-block:: python
+```python
+from climatic_python.Python3Shell import SshPython3Shell
 
-    from climatic_python.Python3Shell import SshPython3Shell
+python_cmd = SshPython3Shell("127.0.0.1", "your.user", "your.password")
+python_cmd.run("""
+i = 3
+for x in range(i):
+    print("Iteration {}".format(x))
 
-    python_cmd = SshPython3Shell("127.0.0.1", "your.user", "your.password")
-    python_cmd.run("""
-    i = 3
-    for x in range(i):
-        print("Iteration {}".format(x))
-
-    """)
+""")
+```
 
 
-List of CLI Clients
--------------------
+## List of CLI Clients
 
 - [climatic-python](https://github.com/evedovelli/climatic-python)
 - [climatic-ipinfusion](https://github.com/evedovelli/climatic-ipinfusion)
