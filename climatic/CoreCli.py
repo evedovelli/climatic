@@ -93,7 +93,7 @@ class CoreCli(object):
 
 
     def run(self, cmds: str, timeout=None, quiet=False, marker="#", error_marker="%", sync_timeout=1,
-            wait_cmd=True, wait_cmd_timeout=1) -> RunResults:
+            wait_cmd=True, wait_cmd_timeout=1, strip_cmds=True) -> RunResults:
         """ Runs CLI commands
         @param cmds              Commands in a multi-line string. Each line is a command.
         @param timeout           Maximum time to wait for command completion. Defaults to the
@@ -109,6 +109,7 @@ class CoreCli(object):
         @param wait_cmd          If True, verifies the echo of the sent command. Default is true.
         @param wait_cmd_timeout  Timeout for receiving the echo of the sent command. Default is 1.
                                  Set to None to use the global timeout defined on constructor.
+        @param strip_cmds        Remove trailing spaces and empty lines. Default is True.
         @return                  The results as an object of RunResults. They include:
                                  - duration: The time spent between the execution of the commands;
                                  - output: A string with the output of the commands.
@@ -139,12 +140,13 @@ class CoreCli(object):
         # Each line is executed as separate command
         for cmd in cmds.splitlines():
 
-            # Remove extra spaces at the begin and end of the command
-            cmd = cmd.strip(' \t')
+            if strip_cmds == True:
+                # Remove extra spaces at the begin and end of the command
+                cmd = cmd.strip(' \t')
 
-            # Ignore empty lines
-            if not cmd:
-                continue
+                # Ignore empty lines
+                if not cmd:
+                    continue
 
             # Prepare cmd echo expects
             if wait_cmd == True:

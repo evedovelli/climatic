@@ -57,8 +57,8 @@ colors = {
 }
 
 colorlist = [
-    {'html': 'darkslategray',  'ansi': ansi_color('black', faint=True)},
-    {'html': 'black',          'ansi': ansi_color('black', bold=True)},
+    {'html': 'darkslategray',  'ansi': ansi_color('white', faint=True)},
+    {'html': 'black',          'ansi': ansi_color('white', bold=True)},
     {'html': 'cyan',           'ansi': ansi_color('cyan')},
     {'html': 'teal',           'ansi': ansi_color('cyan', bold=True)},
     {'html': 'yellow',         'ansi': ansi_color('yellow')},
