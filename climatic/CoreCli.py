@@ -44,15 +44,21 @@ class CoreCli(object):
     return a pexpect connection. The 'disconnect' will close the pexpect connection.
     """
 
-    def __init__(self, connection, username='admin', password='admin', timeout=15, pty_winsize_cols=80):
+    def __init__(self, connection, username='admin', password='admin', timeout=15, sync_timeout=2,
+                 wait_cmd_timeout=2, pty_winsize_cols=80):
         """ Initialize BaseCLI.
-        @param connection  The connection object to be used for accessing the CLI.
-        @param username    String with username to login into the connection that provides access to
-                           the CLI.
-        @param password    String with password corresponding to the username to login into the
-                           connection that provides access to the CLI.
-        @param timeout     Default maximum timeout on each CLI command. When specified in a CLI
-                           command, the specific timeout takes precedence.
+        @param connection        The connection object to be used for accessing the CLI.
+        @param username          String with username to login into the connection that provides
+                                 access to the CLI.
+        @param password          String with password corresponding to the username to login into
+                                 the connection that provides access to the CLI.
+        @param timeout           Default maximum timeout on each CLI command. When specified in a
+                                 CLI command, the specific timeout takes precedence.
+        @param sync_timeout      Maximum time to wait for syncing the command. Default is 1.
+                                 Set to None to use the global timeout defined on constructor.
+        @param wait_cmd_timeout  Timeout for receiving the echo of the sent command. Default is 1.
+                                 Set to None to use the global timeout defined on constructor.
+        @param pty_winsize_cols  The number of columns of the window.
         """
         if not hasattr(self, 'name'):
            self.name = self.__class__.__name__
@@ -61,6 +67,8 @@ class CoreCli(object):
         self.username = username
         self.password = password
         self.timeout = timeout
+        self.sync_timeout = sync_timeout
+        self.wait_cmd_timeout = wait_cmd_timeout
 
         # Number of columns of the window
         self.pty_winsize_cols = pty_winsize_cols
@@ -92,8 +100,8 @@ class CoreCli(object):
         self.connection.disconnect(logger=self.logger)
 
 
-    def run(self, cmds: str, timeout=None, quiet=False, marker="#", error_marker="%", sync_timeout=1,
-            wait_cmd=True, wait_cmd_timeout=1, strip_cmds=True) -> RunResults:
+    def run(self, cmds: str, timeout=None, quiet=False, marker="#", error_marker="%",
+            sync_timeout=None, wait_cmd=True, wait_cmd_timeout=None, strip_cmds=True) -> RunResults:
         """ Runs CLI commands
         @param cmds              Commands in a multi-line string. Each line is a command.
         @param timeout           Maximum time to wait for command completion. Defaults to the
@@ -104,11 +112,11 @@ class CoreCli(object):
         @param error_marker      Regex used to identify when error occurs during the command
                                  execution. Default is "%". Set "error_marker = None" to not check
                                  errors.
-        @param sync_timeout      Maximum time to wait for syncing the command. Default is 1.
-                                 Set to None to use the global timeout defined on constructor.
+        @param sync_timeout      Maximum time to wait for syncing the command. Defaults to the
+                                 timeout defined on the constructor.
         @param wait_cmd          If True, verifies the echo of the sent command. Default is true.
-        @param wait_cmd_timeout  Timeout for receiving the echo of the sent command. Default is 1.
-                                 Set to None to use the global timeout defined on constructor.
+        @param wait_cmd_timeout  Timeout for receiving the echo of the sent command. Defaults to the
+                                 timeout defined on the constructor.
         @param strip_cmds        Remove trailing spaces and empty lines. Default is True.
         @return                  The results as an object of RunResults. They include:
                                  - duration: The time spent between the execution of the commands;
@@ -123,9 +131,9 @@ class CoreCli(object):
         if timeout == None:
             timeout = self.timeout
         if sync_timeout == None:
-            sync_timeout = self.timeout
+            sync_timeout = self.sync_timeout
         if wait_cmd_timeout == None:
-            wait_cmd_timeout = self.timeout
+            wait_cmd_timeout = self.wait_cmd_timeout
 
         self.open_logfile()
         start_time = time.time()

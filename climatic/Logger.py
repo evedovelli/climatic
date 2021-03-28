@@ -1,5 +1,6 @@
 import time
 import logging
+import sys
 
 from random import randint
 
@@ -118,7 +119,8 @@ def start(name, log_to_stdout=True, colored=True):
     if not hasattr(logger, 'configured'):
         logger.setLevel(logging.INFO)
         if log_to_stdout:
-            stdout_handler = logging.StreamHandler()
+            stdout_handler = logging.StreamHandler(sys.stdout)
+            stdout_handler.setLevel(logging.INFO)
             if colored:
                 stdout_handler.setFormatter(ColoredFormatter())
             else:
