@@ -1,1 +1,2 @@
 pexpect==4.8.0
+expects==0.9.0

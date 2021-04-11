@@ -67,6 +67,27 @@ expect(cmd.run("sleep 3").duration).to(be_above(2))
 
 > Read the [`expects`](https://github.com/jaimegildesagredo/expects) docs for discovering other matchers or how to build your own.
 
+Also, instead of `run` you can call the `cli` method. In this case you pass as argument a
+complete CLI session, and the command will parse the commands, execute them, and match the outputs.
+Like this:
+
+```python
+from climatic.cli.Linux import SshLinux
+from expects import *
+
+cmd = SshLinux("127.0.0.1", "your.user", "your.password")
+
+# Run the commands line by line and expect for outputs
+# for the lines without the shell marker:
+cmd.cli("""
+    ~# mkdir /tmp/test
+    ~# ls /tmp/
+    test
+    ~# rm -rv /tmp/test
+    removed directory '/tmp/test'
+    """)
+```
+
 **CLImatic** includes only a few built-in CLI clients, as the Linux client from the example above,
 but you will find many other CLI clients extensions. There a list with supported CLI clients in
 [here](#list-of-cli-clients).

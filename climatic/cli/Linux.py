@@ -1,5 +1,7 @@
 import pexpect
 
+from typing import Optional
+
 from ..CoreCli import CoreCli
 from ..connections.Ssh import Ssh, PTY_WINSIZE_COLS
 from ..connections.Ssh import PTY_WINSIZE_COLS as SSH_PTY_WINSIZE_COLS
@@ -35,25 +37,39 @@ class SshLinux(Linux):
     Core implementation is done by Ssh and Linux.
     """
 
-    def __init__(self, ip: str, username: str, password: str, port=22, marker='#|>'):
+    def __init__(self,
+                 ip: str,
+                 username: str,
+                 password: str,
+                 port: Optional[int]=22,
+                 **opts):
         """ Initialize Linux Shell.
         @param ip        IP address of target. Ex: '234.168.10.12'
         @param username  username for opening SSH connection
-        @param password  password for authentication in SSH connection
-        @param port      Port used for SSH connection. Defaults to 22
-        @param marker    Marker for the shell prompt
+        @param password  String with password corresponding to the username to login into
+                         the connection that provides access to the CLI.
+        @param port        Port used for SSH connection. Defaults to 22
+        @param opts      Same options as CoreCli initializer.
         """
-        self.marker = marker
+        if not 'marker' in opts:
+            opts['marker'] = '#|>'
+
         self.name = "Linux.SSH"
         ssh = Ssh(ip, username, port=port)
-        Linux.__init__(self, ssh, username=username, password=password, pty_winsize_cols=SSH_PTY_WINSIZE_COLS)
+        Linux.__init__(self,
+                       ssh,
+                       username=username,
+                       password=password,
+                       pty_winsize_cols=SSH_PTY_WINSIZE_COLS,
+                       **opts)
 
     def login(self):
         """ Login to CLI interface.
         """
         while True:
             index = self.connection.terminal.expect(
-                ['Are you sure you want to continue connecting', '.assword'] + [self.marker], timeout=10)
+                ['Are you sure you want to continue connecting', '.assword', self.marker],
+                timeout=10)
 
             if index == 0:
                 self.connection.terminal.sendline('yes')
