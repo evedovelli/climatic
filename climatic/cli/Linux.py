@@ -3,6 +3,7 @@ import pexpect
 from typing import Optional
 
 from ..CoreCli import CoreCli
+from ..connections.Ser2Net import Ser2Net
 from ..connections.Ssh import Ssh, PTY_WINSIZE_COLS
 from ..connections.Ssh import PTY_WINSIZE_COLS as SSH_PTY_WINSIZE_COLS
 
@@ -83,3 +84,55 @@ class SshLinux(Linux):
         """ Logout from CLI interface.
         """
         self.connection.terminal.sendline('exit')
+
+
+####################################################################################################
+## Ser2NetLinux
+
+class Ser2NetLinux(SshLinux):
+    """ Connects to a remote Linux Shell using SSH.
+    Core implementation is done by Ssh and Linux.
+    """
+
+    def __init__(self,
+                 ip: str,
+                 port: int,
+                 username: str,
+                 password: str,
+                 **opts):
+        """ Initialize Linux Shell.
+        @param ip        IP address of ser2net server. Ex: '234.168.10.12'
+        @param port        Port used for ser2net connection.
+        @param username  username for opening ser2net connection
+        @param password  String with password corresponding to the username to login into
+                         the connection that provides access to the CLI.
+
+        @param opts      Same options as CoreCli initializer.
+        """
+        if not 'marker' in opts:
+            opts['marker'] = '#|>'
+
+        self.name = "Linux.Ser2Net"
+        ser2net = Ser2Net(ip, port)
+        Linux.__init__(self,
+                       ser2net,
+                       username=username,
+                       password=password,
+                       pty_winsize_cols=SSH_PTY_WINSIZE_COLS,
+                       **opts)
+
+    def login(self):
+        """ Login to CLI interface.
+        """
+        while True:
+            index = self.connection.terminal.expect(
+                ['.ogin', '.assword', self.marker],
+                timeout=10)
+
+            if index == 0:
+                self.connection.terminal.sendline(self.username)
+            if index == 1:
+                self.connection.terminal.waitnoecho()
+                self.connection.terminal.sendline(self.password)
+            if index >= 2:
+                break

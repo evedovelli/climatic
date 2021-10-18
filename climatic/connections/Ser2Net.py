@@ -6,7 +6,6 @@ from .Connection import Connection
 PTY_WINSIZE_ROWS = 24
 PTY_WINSIZE_COLS = 500
 
-
 class Ser2Net(Connection):
     """ Connects to a CLI using Ser2net.
     The Ser2Net should be available and configured with an IP and port
@@ -36,7 +35,7 @@ class Ser2Net(Connection):
         self.terminal.setwinsize(PTY_WINSIZE_ROWS, PTY_WINSIZE_COLS)
 
     def disconnect(self, logger=None):
-        """ For Ser2Net, the connection needs to be explicitly closed
+        """ For Ser2Net, the connection is closed during the logout
         @param logger   Optional logger for debug messages
         """
         if logger != None:
