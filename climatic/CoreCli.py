@@ -398,7 +398,7 @@ class CoreCli(object):
         first_line_left_cols = self.pty_winsize_cols - prompt_size
         if len(cmd) > first_line_left_cols:
             expects = [cmd[:first_line_left_cols]]
-            for i in range(first_line_left_cols, len(cmd), pty_winsize_cols):
+            for i in range(first_line_left_cols, len(cmd), self.pty_winsize_cols):
                 expects.append(cmd[i:i+self.pty_winsize_cols])
         else:
             expects = [cmd]
