@@ -70,10 +70,6 @@ class SshLinux(Linux):
     def login(self):
         """ Login to CLI interface.
         """
-        if self.has_id:
-            # Already logged in
-            return
-
         while True:
             index = self.connection.terminal.expect(
                 ['Are you sure you want to continue connecting', '.assword', self.marker],

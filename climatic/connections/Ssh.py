@@ -43,8 +43,8 @@ class Ssh(Connection):
             cipher_spec = '-c {}'.format(self.ciphers)
 
         if self.identification != None:
-            self.terminal = pexpect.spawn('ssh -i {0} -p {2} {1} {3}'.format(
-                self.identification, self.ip, self.port, cipher_spec), logfile=logfile, encoding='utf-8')
+            self.terminal = pexpect.spawn('ssh -i {4} -p {2} {0}@{1} {3}'.format(
+                self.user, self.ip, self.port, cipher_spec, self.identification), logfile=logfile, encoding='utf-8')
         else:
             self.terminal = pexpect.spawn('ssh -p {2} {0}@{1} {3}'.format(
                 self.user, self.ip, self.port, cipher_spec), logfile=logfile, encoding='utf-8')
