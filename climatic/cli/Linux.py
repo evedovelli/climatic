@@ -43,6 +43,7 @@ class SshLinux(Linux):
                  username: str,
                  password: str,
                  port: Optional[int]=22,
+                 id_file: Optional[str]=None,
                  **opts):
         """ Initialize Linux Shell.
         @param ip        IP address of target. Ex: '234.168.10.12'
@@ -50,13 +51,15 @@ class SshLinux(Linux):
         @param password  String with password corresponding to the username to login into
                          the connection that provides access to the CLI.
         @param port        Port used for SSH connection. Defaults to 22
+        @param id_file   Path of file to be used as user identification (usually a private key)
         @param opts      Same options as CoreCli initializer.
         """
         if not 'marker' in opts:
             opts['marker'] = '#|>'
 
         self.name = "Linux.SSH"
-        ssh = Ssh(ip, username, port=port)
+        self.has_id = id_file != None
+        ssh = Ssh(ip, username, port=port, identification=id_file)
         Linux.__init__(self,
                        ssh,
                        username=username,
@@ -67,6 +70,10 @@ class SshLinux(Linux):
     def login(self):
         """ Login to CLI interface.
         """
+        if self.has_id:
+            # Already logged in
+            return
+
         while True:
             index = self.connection.terminal.expect(
                 ['Are you sure you want to continue connecting', '.assword', self.marker],
