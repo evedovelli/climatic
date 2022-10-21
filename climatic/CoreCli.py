@@ -50,6 +50,7 @@ class CoreCli(object):
                  connection,
                  username: Optional[str]='admin',
                  password: Optional[str]='admin',
+                 identification: Optional[str]='',
                  timeout: Optional[int]=15,
                  quiet: Optional[bool]=False,
                  marker: Optional[str]="#",
@@ -103,6 +104,8 @@ class CoreCli(object):
             self.wait_cmd_timeout = wait_cmd_timeout
         if not hasattr(self, 'strip_cmds'):
             self.strip_cmds = strip_cmds
+        if not hasattr(self, 'identification'):
+            self.identification = identification
 
         self.logger = Logger.start(self.name)
         self.connection = connection

@@ -14,17 +14,19 @@ class Ssh(Connection):
     The device should have the IP configured.
     """
 
-    def __init__(self, ip: str, user: str, port=SSH_PORT, ciphers: str = None):
+    def __init__(self, ip: str, user: str, port=SSH_PORT, ciphers: str = None, identification: str = None):
         """ Initialize the SSH connection object.
         @param ip       IP address to connect to. Ex: '192.168.33.4'.
         @param user     The SSH connection user.
         @param port     The SSH connection port. Default is 22.
-        @param ciphers  A comma sepparated list of ciphers. Ex: 'blowfish-cbc,3des-cbc'
+        @param ciphers          A comma sepparated list of ciphers. Ex: 'blowfish-cbc,3des-cbc'
+        @param identification   Path of file to be used for "-i" argument, usually a private key
         """
         self.user = user
         self.ip = ip
         self.port = port
         self.ciphers = ciphers
+        self.identification = identification
 
         Connection.__init__(self)
 
@@ -40,8 +42,13 @@ class Ssh(Connection):
         if self.ciphers != None:
             cipher_spec = '-c {}'.format(self.ciphers)
 
-        self.terminal = pexpect.spawn('ssh -p {2} {0}@{1} {3}'.format(
-            self.user, self.ip, self.port, cipher_spec), logfile=logfile, encoding='utf-8')
+        if self.identification != None:
+            self.terminal = pexpect.spawn('ssh -i {4} -p {2} {0}@{1} {3}'.format(
+                self.user, self.ip, self.port, cipher_spec, self.identification), logfile=logfile, encoding='utf-8')
+        else:
+            self.terminal = pexpect.spawn('ssh -p {2} {0}@{1} {3}'.format(
+                self.user, self.ip, self.port, cipher_spec), logfile=logfile, encoding='utf-8')
+
         self.terminal.setwinsize(PTY_WINSIZE_ROWS, PTY_WINSIZE_COLS)
 
     def disconnect(self, logger=None):
