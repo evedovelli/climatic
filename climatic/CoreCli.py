@@ -50,6 +50,7 @@ class CoreCli(object):
                  connection,
                  username: Optional[str]='admin',
                  password: Optional[str]='admin',
+                 identification: Optional[str]='',
                  timeout: Optional[int]=15,
                  quiet: Optional[bool]=False,
                  marker: Optional[str]="#",
@@ -103,6 +104,8 @@ class CoreCli(object):
             self.wait_cmd_timeout = wait_cmd_timeout
         if not hasattr(self, 'strip_cmds'):
             self.strip_cmds = strip_cmds
+        if not hasattr(self, 'identification'):
+            self.identification = identification
 
         self.logger = Logger.start(self.name)
         self.connection = connection
@@ -357,10 +360,13 @@ class CoreCli(object):
 
         @param marker  regex used to identify the start of a command line.
         """
-        # consume all markers since last 'expect'
-        while self.connection.terminal.expect([marker, pexpect.TIMEOUT], timeout=0.01) == 0:
-            continue
-
+        try:
+            while True:
+                self.connection.terminal.read_nonblocking(size=1024, timeout=0.1)
+        except pexpect.exceptions.TIMEOUT:
+            pass
+        except pexpect.exceptions.EOF:
+            pass
 
     def _get_prompt_size(self) -> int:
         """ Returns the prompt size: the number of visible chars from the beginning of the
